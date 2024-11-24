@@ -35,6 +35,7 @@ class Maze(RobotControl):
         return self.front_laser > front_barrier_proximity and self.front_left_laser > front_barrier_proximity and self.front_right_laser > front_barrier_proximity
 
     def make_turn(self):
+        #TODO: the bot turns in the wrong direction fix
         if self.should_turn_left():
             rospy.loginfo("turning left, front left laser proximity, %fm", self.front_left_laser)
             initial_reading = self.front_left_laser
