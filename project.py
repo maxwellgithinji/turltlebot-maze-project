@@ -24,6 +24,8 @@ class Maze(RobotControl):
         # try to turn the robot after stopping
         self.make_turn()
 
+        self.navigate()
+
     def set_front_lasers(self):
         full_laser = self.get_laser_full()
         self.front_laser =  full_laser[360]
@@ -35,7 +37,6 @@ class Maze(RobotControl):
         return self.front_laser > front_barrier_proximity and self.front_left_laser > front_barrier_proximity and self.front_right_laser > front_barrier_proximity
 
     def make_turn(self):
-        #TODO: the bot turns in the wrong direction fix
         if self.should_turn_left():
             rospy.loginfo("turning left, front left laser proximity, %fm", self.front_left_laser)
             initial_reading = self.front_left_laser
@@ -50,15 +51,17 @@ class Maze(RobotControl):
                 self.set_front_lasers()
 
     def should_turn_left(self):
-        return self.front_left_laser > self.front_laser
+        return self.front_left_laser > self.front_laser and self.front_laser < 1
     def should_turn_right(self):
-        return self.front_right_laser > self.front_laser
+        return self.front_right_laser > self.front_laser and self.front_laser < 1
     
     def left_oversteer(self, initial_reading):
-        return self.front_left_laser < initial_reading
+        print(self.front_left_laser, initial_reading)
+        return self.front_left_laser < initial_reading or self.front_laser > 2
         
     def right_oversteer(self, initial_reading):
-        return self.front_right_laser < initial_reading
+        print(self.front_right_laser, initial_reading)
+        return self.front_right_laser < initial_reading or  self.front_laser > 2
     
 m = Maze()
 
