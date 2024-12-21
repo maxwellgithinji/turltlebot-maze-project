@@ -1,7 +1,10 @@
 
+from cmath import pi
 from robot_control_class import RobotControl
 import rospy
-
+# Create a protective field
+# - focuses on front lasers when moving forward
+# focuses on side lasers when turning
 class Maze(RobotControl):
     def __init__(self, route=1):
         super().__init__()
@@ -27,6 +30,7 @@ class Maze(RobotControl):
         # try to turn the robot after stopping
         self.make_turn()
 
+        # recursively navigate until a barrier is encountered
         self.navigate()
 
     def set_front_lasers(self):
@@ -36,35 +40,34 @@ class Maze(RobotControl):
         self.front_right_laser = min(full_laser[440-self.SCAN_RANGE:440+self.SCAN_RANGE])
     
     def can_move_staright(self):
-        front_barrier_proximity = 0.8
+        front_barrier_proximity = 1
         return self.front_laser > front_barrier_proximity and self.front_left_laser > front_barrier_proximity and self.front_right_laser > front_barrier_proximity
 
     def make_turn(self):
-        if self.should_turn_left():
-            rospy.loginfo("turning left, front left laser proximity, %fm", self.front_left_laser)
-            initial_reading = self.front_left_laser
-            while not self.left_oversteer(initial_reading):
-                self.rotate(-5)
-                self.set_front_lasers()
-        elif self.should_turn_right():
-            rospy.loginfo("turning right, front right laser proximity %fm", self.front_right_laser)
-            initial_reading = self.front_right_laser 
-            while not self.right_oversteer(initial_reading):
-                self.rotate(5)
-                self.set_front_lasers()
+        turn_direction = self.set_turn_direction()
+        circle_radians = 2*pi
+        max_rotation = 0
+        angle = 5
 
-    def should_turn_left(self):
-        return self.front_right_laser < 1
-    def should_turn_right(self):
-        return self.front_left_laser < 1
-    
-    def left_oversteer(self, initial_reading):
-        rospy.logwarn("left oversteer, front left proximity %fm away",self.front_left_laser)
-        return self.front_left_laser < initial_reading
+        # avaoid infinite turns
+        while max_rotation < circle_radians:
+            self.rotate(angle * turn_direction)
+            self.set_front_lasers()
+
+            if self.can_move_staright():
+                rospy.loginfo("found clear path")
+                return
+
+            max_rotation += abs(angle * pi/180) #converts the turn angle to radians
         
-    def right_oversteer(self, initial_reading):
-        rospy.logwarn("right oversteer, front right proximiyt %fm away",self.front_right_laser)
-        return self.front_right_laser < initial_reading
+        rospy.logwarn("Could not find clear path after full rotation")
+        
+
+    def set_turn_direction(self):
+        if self.front_left_laser > self.front_right_laser:
+             return -1 #left
+        else:
+            return 1 #right
     
 m = Maze()
 
