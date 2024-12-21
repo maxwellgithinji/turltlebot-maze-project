@@ -9,6 +9,8 @@ class Maze(RobotControl):
         self.front_laser = self.get_front_laser()
         self.front_left_laser = self.get_laser(200)
         self.front_right_laser = self.get_laser(440)
+        self.BARRIER_PROXIMITY = 1.0 
+        self.SCAN_RANGE = 30
         
 
     def navigate(self):
@@ -29,12 +31,12 @@ class Maze(RobotControl):
 
     def set_front_lasers(self):
         full_laser = self.get_laser_full()
-        self.front_laser =  full_laser[360]
-        self.front_left_laser = full_laser[200]
-        self.front_right_laser = full_laser[440]
+        self.front_laser =  min(full_laser[360-15:360+15])
+        self.front_left_laser = min(full_laser[200-self.SCAN_RANGE:200+self.SCAN_RANGE])
+        self.front_right_laser = min(full_laser[440-self.SCAN_RANGE:440+self.SCAN_RANGE])
     
     def can_move_staright(self):
-        front_barrier_proximity = 1
+        front_barrier_proximity = 0.8
         return self.front_laser > front_barrier_proximity and self.front_left_laser > front_barrier_proximity and self.front_right_laser > front_barrier_proximity
 
     def make_turn(self):
