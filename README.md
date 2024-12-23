@@ -13,11 +13,13 @@ This project implements an autonomous navigation algorithm for a TurtleBot robot
 ## Technical Details
 
 ### Hardware Requirements
+![laser](https://github.com/user-attachments/assets/290f3a92-94cf-47fc-9f55-f025c9817535)
 - TurtleBot robot
 - Laser Scanner with:
   - 720 laser beams
   - 180-degree scan range
   - Field of view: Beam 0 to Beam 719
+  
 
 ### Software Requirements
 - ROS (Robot Operating System)
